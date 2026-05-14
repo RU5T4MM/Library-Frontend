@@ -1,21 +1,80 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginStart, loginSuccess, loginFailure } from '../../redux/slices/authSlice';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
-import { FiEye, FiEyeOff, FiUser, FiShield } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiUser, FiShield, FiAlertTriangle, FiX, FiUserPlus } from 'react-icons/fi';
+
+const DeletedAccountPopup = ({ onClose }) => (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <motion.div
+            initial={{ opacity: 0, scale: 0.85, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 max-w-md w-full relative border border-red-100 dark:border-red-900/30"
+        >
+            <button
+                onClick={onClose}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 transition-colors"
+            >
+                <FiX size={18} />
+            </button>
+
+            <div className="text-center">
+                <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <FiAlertTriangle className="text-red-500" size={36} />
+                </div>
+
+                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
+                    Account Deleted
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">
+                    Aapka account admin dwara delete kar diya gaya hai. <br />
+                    Dobara library join karne ke liye naya account banayein.
+                </p>
+
+                <div className="space-y-3">
+                    <Link
+                        to="/register"
+                        onClick={onClose}
+                        className="flex items-center justify-center gap-2 w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:scale-[1.02]"
+                    >
+                        <FiUserPlus size={18} />
+                        Create New Account
+                    </Link>
+                    <button
+                        onClick={onClose}
+                        className="w-full py-3 px-6 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-medium rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </motion.div>
+    </div>
+);
 
 const HeroSection = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { loading, isAuthenticated, user } = useSelector((state) => state.auth);
+    const { loading, isAuthenticated, user, accountDeleted } = useSelector((state) => state.auth);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loginRole, setLoginRole] = useState('user');
+    const [showDeletedPopup, setShowDeletedPopup] = useState(false);
+
+    // Show popup if accountDeleted flag is set (from redux or localStorage)
+    useEffect(() => {
+        if (accountDeleted || localStorage.getItem('accountDeleted') === 'true') {
+            setShowDeletedPopup(true);
+            localStorage.removeItem('accountDeleted');
+        }
+    }, [accountDeleted]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -30,13 +89,19 @@ const HeroSection = () => {
                 navigate('/dashboard');
             }
         } catch (error) {
-            dispatch(loginFailure(error.response?.data?.error || 'Login failed'));
-            toast.error(error.response?.data?.error || 'Login failed');
+            const errMsg = error.response?.data?.error || 'Login failed';
+            dispatch(loginFailure(errMsg));
+            toast.error(errMsg);
         }
     };
 
     return (
         <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+
+            <AnimatePresence>
+                {showDeletedPopup && <DeletedAccountPopup onClose={() => setShowDeletedPopup(false)} />}
+            </AnimatePresence>
+
             {/* Background Blobs */}
             <div className="absolute inset-0 z-0 overflow-hidden">
                 <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] animate-pulse"></div>
@@ -86,7 +151,6 @@ const HeroSection = () => {
                 >
                     <div className="glass-card p-8 rounded-3xl relative z-10 w-full shadow-2xl">
                         {isAuthenticated ? (
-                            /* Already logged in state */
                             <div className="text-center py-8">
                                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
                                     {user?.name?.charAt(0).toUpperCase()}

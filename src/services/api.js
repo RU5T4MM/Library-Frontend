@@ -1,14 +1,12 @@
 import axios from 'axios';
 
 const api = axios.create({
-    // Use environment variable for production, fallback to localhost for development
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Add a request interceptor to attach the token
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -17,7 +15,21 @@ api.interceptors.request.use(
         }
         return config;
     },
+    (error) => Promise.reject(error)
+);
+
+// Auto-logout if backend returns 401 (deleted/invalid user)
+api.interceptors.response.use(
+    (response) => response,
     (error) => {
+        if (error.response?.status === 401) {
+            const hadToken = !!localStorage.getItem('token');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            if (hadToken) {
+                localStorage.setItem('accountDeleted', 'true');
+            }
+        }
         return Promise.reject(error);
     }
 );

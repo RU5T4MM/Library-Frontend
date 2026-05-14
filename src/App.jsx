@@ -1,5 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { verifyAuth } from './redux/slices/authSlice';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Components
@@ -18,6 +21,14 @@ import ForgotPassword from './pages/ForgotPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+  const dispatch = useDispatch();
+  const { verifying } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(verifyAuth());
+  }, [dispatch]);
+
+  if (verifying) return <div className="flex items-center justify-center min-h-screen"><div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>;
   return (
     <Router>
       <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
