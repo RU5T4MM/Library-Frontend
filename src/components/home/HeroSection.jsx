@@ -246,18 +246,7 @@ const HeroSection = () => {
                         )}
                     </div>
 
-                    {/* Floating badge */}
-                    <motion.div
-                        animate={{ y: [0, -12, 0] }}
-                        transition={{ repeat: Infinity, duration: 4 }}
-                        className="absolute -top-6 right-0 sm:-right-4 glass-card p-3 rounded-xl flex items-center gap-2 z-20 shadow-2xl bg-white/90 dark:bg-slate-800/90"
-                    >
-                        <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 text-sm">✓</div>
-                        <div>
-                            <p className="text-xs font-bold text-slate-900 dark:text-white">Smart Booking</p>
-                            <p className="text-xs text-slate-500">Instant Confirmation</p>
-                        </div>
-                    </motion.div>
+
                 </motion.div>
             </div>
 
