@@ -49,7 +49,7 @@ const Register = () => {
             if (profilePhoto) {
                 const formData = new FormData();
                 formData.append('image', profilePhoto);
-                const res = await api.post('/upload', formData, {
+                const res = await api.post('/upload/register', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 profileUrl = res.data.data;
@@ -57,7 +57,7 @@ const Register = () => {
 
             const formDataAadhaar = new FormData();
             formDataAadhaar.append('image', aadhaarPhoto);
-            const resAadhaar = await api.post('/upload', formDataAadhaar, {
+            const resAadhaar = await api.post('/upload/register', formDataAadhaar, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             aadhaarUrl = resAadhaar.data.data;
