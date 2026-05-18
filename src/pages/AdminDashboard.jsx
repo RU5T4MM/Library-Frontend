@@ -135,10 +135,10 @@ const AdminDashboard = () => {
             {/* Top Header */}
             <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-16 z-40">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-14">
-                        <div className="flex items-center gap-6">
-                            <h1 className="text-lg font-bold text-slate-900 dark:text-white">Admin Panel</h1>
-                            <div className="flex gap-1">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 min-h-[3.5rem]">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-6 w-full sm:w-auto">
+                            <h1 className="text-lg font-bold text-slate-900 dark:text-white hidden sm:block">Admin Panel</h1>
+                            <div className="flex flex-wrap gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
                                 {tabs.map(tab => (
                                     <button
                                         key={tab.id}
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 absolute sm:static top-3 right-4">
                             <button
                                 onClick={fetchAll}
                                 className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
