@@ -135,41 +135,67 @@ const AdminDashboard = () => {
             {/* Top Header */}
             <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-16 z-40">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 min-h-[3.5rem]">
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-6 w-full sm:w-auto">
-                            <h1 className="text-lg font-bold text-slate-900 dark:text-white hidden sm:block">Admin Panel</h1>
-                            <div className="flex flex-wrap gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-                                {tabs.map(tab => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                                            activeTab === tab.id
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-                                        }`}
-                                    >
-                                        <tab.icon size={14} />
-                                        {tab.label}
-                                    </button>
-                                ))}
+                    <div className="flex flex-col gap-3 py-3 min-h-[3.5rem]">
+                        
+                        {/* Mobile Title + Actions */}
+                        <div className="flex items-center justify-between w-full sm:hidden">
+                            <h1 className="text-lg font-bold text-slate-900 dark:text-white">Admin Panel</h1>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={fetchAll}
+                                    className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                    title="Refresh"
+                                >
+                                    <FiRefreshCw size={16} />
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+                                >
+                                    <FiLogOut size={14} />
+                                </button>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 absolute sm:static top-3 right-4">
-                            <button
-                                onClick={fetchAll}
-                                className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                title="Refresh"
-                            >
-                                <FiRefreshCw size={16} />
-                            </button>
-                            <button
-                                onClick={handleLogout}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
-                            >
-                                <FiLogOut size={14} />
-                                Logout
-                            </button>
+
+                        {/* Desktop row: Title + Tabs + Desktop Actions */}
+                        <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center gap-6 w-full sm:w-auto">
+                                <h1 className="text-lg font-bold text-slate-900 dark:text-white hidden sm:block flex-shrink-0">Admin Panel</h1>
+                                <div className="flex gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scrollbar-hide">
+                                    {tabs.map(tab => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
+                                                activeTab === tab.id
+                                                    ? 'bg-indigo-600 text-white'
+                                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                            }`}
+                                        >
+                                            <tab.icon size={14} />
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Desktop Actions */}
+                            <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
+                                <button
+                                    onClick={fetchAll}
+                                    className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                    title="Refresh"
+                                >
+                                    <FiRefreshCw size={16} />
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+                                >
+                                    <FiLogOut size={14} />
+                                    Logout
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
