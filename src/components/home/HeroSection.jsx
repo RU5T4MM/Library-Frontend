@@ -121,7 +121,7 @@ const HeroSection = () => {
                             ✨ Welcome to Infotech Library
                         </span>
 
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-white leading-tight mb-6">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-white leading-tight mb-6">
                             Smart Study <br />
                             <span className="premium-gradient-text">Environment</span> <br />
                             for Smart Students
@@ -250,7 +250,7 @@ const HeroSection = () => {
                     <motion.div
                         animate={{ y: [0, -12, 0] }}
                         transition={{ repeat: Infinity, duration: 4 }}
-                        className="absolute -top-6 -right-4 glass-card p-3 rounded-xl flex items-center gap-2 z-20 shadow-2xl bg-white/90 dark:bg-slate-800/90"
+                        className="absolute -top-6 right-0 sm:-right-4 glass-card p-3 rounded-xl flex items-center gap-2 z-20 shadow-2xl bg-white/90 dark:bg-slate-800/90"
                     >
                         <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 text-sm">✓</div>
                         <div>

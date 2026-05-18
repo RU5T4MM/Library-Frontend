@@ -243,7 +243,7 @@ const AdminDashboard = () => {
                                     <thead className="bg-slate-50 dark:bg-slate-800/50">
                                         <tr>
                                             {['Student', 'Mobile', 'Seat', 'Plan', 'Amount', 'Payment Proof', 'Actions'].map(h => (
-                                                <th key={h} className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
+                                                <th key={h} className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                                             ))}
                                         </tr>
                                     </thead>
@@ -257,23 +257,23 @@ const AdminDashboard = () => {
                                             </tr>
                                         ) : requests.map((req) => (
                                             <tr key={req._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     <p className="font-semibold text-slate-900 dark:text-white">{req.userId?.name}</p>
                                                     <p className="text-xs text-slate-500">{req.userId?.email}</p>
                                                 </td>
-                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300">{req.userId?.mobile}</td>
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">{req.userId?.mobile}</td>
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full font-bold text-sm">
                                                         #{req.seatNumber?.seatNumber}
                                                     </span>
                                                 </td>
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium">
                                                         {req.plan}
                                                     </span>
                                                 </td>
-                                                <td className="py-4 px-4 font-bold text-slate-900 dark:text-white">₹{req.amount}</td>
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 font-bold text-slate-900 dark:text-white whitespace-nowrap">₹{req.amount}</td>
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     <a
                                                         href={req.paymentScreenshot}
                                                         target="_blank"
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
                                                         <FiEye size={14} /> View
                                                     </a>
                                                 </td>
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => handleAction(req._id, 'approved')}
@@ -327,7 +327,7 @@ const AdminDashboard = () => {
                                     <thead className="bg-slate-50 dark:bg-slate-800/50">
                                         <tr>
                                             {['Student', 'Mobile', 'Seat', 'Plan', 'Status', 'Expiry', 'Actions'].map(h => (
-                                                <th key={h} className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
+                                                <th key={h} className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                                             ))}
                                         </tr>
                                     </thead>
@@ -338,7 +338,7 @@ const AdminDashboard = () => {
                                             </tr>
                                         ) : users.map((u) => (
                                             <tr key={u._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 font-bold text-sm flex-shrink-0">
                                                             {u.name?.charAt(0).toUpperCase()}
@@ -349,8 +349,8 @@ const AdminDashboard = () => {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300">{u.mobile}</td>
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">{u.mobile}</td>
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     {u.seatNumber ? (
                                                         <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full font-bold text-sm">
                                                             #{u.seatNumber.seatNumber}
@@ -363,10 +363,10 @@ const AdminDashboard = () => {
                                                         <span className="text-slate-400 text-sm">—</span>
                                                     )}
                                                 </td>
-                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300">
+                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                                     {u.membershipPlan !== 'None' ? u.membershipPlan : (u.pendingPayment?.plan || 'None')}
                                                 </td>
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                                                         u.bookingStatus === 'approved' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' :
                                                         u.bookingStatus === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400' :
@@ -376,12 +376,12 @@ const AdminDashboard = () => {
                                                         {u.bookingStatus || 'none'}
                                                     </span>
                                                 </td>
-                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300">
+                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                                     {u.membershipExpiryDate
                                                         ? new Date(u.membershipExpiryDate).toLocaleDateString('en-IN')
                                                         : '—'}
                                                 </td>
-                                                <td className="py-4 px-4">
+                                                <td className="py-4 px-4 whitespace-nowrap">
                                                     <div className="flex flex-wrap gap-2">
                                                         <button
                                                             onClick={() => setSelectedUser(u)}
@@ -485,7 +485,7 @@ const AdminDashboard = () => {
 
                             {/* Modal Body */}
                             <div className="p-6 space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
                                         <p className="text-xs text-slate-500 mb-1">Mobile</p>
                                         <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedUser.mobile}</p>
@@ -519,7 +519,7 @@ const AdminDashboard = () => {
                                 </div>
 
                                 {selectedUser.membershipStartDate && (
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
                                             <p className="text-xs text-slate-500 mb-1">Start Date</p>
                                             <p className="font-semibold text-slate-900 dark:text-white text-sm">
@@ -553,7 +553,7 @@ const AdminDashboard = () => {
                                 {selectedUser.bookingStatus === 'pending' && selectedUser.pendingPayment && (
                                     <div className="border border-yellow-200 dark:border-yellow-700/50 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4">
                                         <p className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 mb-3 uppercase tracking-wide">Pending Payment Request</p>
-                                        <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3 text-sm">
                                             <div>
                                                 <p className="text-xs text-slate-500">Plan</p>
                                                 <p className="font-bold text-slate-900 dark:text-white">{selectedUser.pendingPayment.plan}</p>

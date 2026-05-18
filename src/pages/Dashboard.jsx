@@ -151,8 +151,8 @@ const Dashboard = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">My Dashboard</h1>
-                        <p className="text-slate-600 dark:text-slate-400 mt-1">Welcome back, <span className="font-semibold text-indigo-600">{user?.name}</span></p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">My Dashboard</h1>
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-1">Welcome back, <span className="font-semibold text-indigo-600">{user?.name}</span></p>
                     </div>
                     <button
                         onClick={handleLogout}
@@ -277,7 +277,7 @@ const Dashboard = () => {
                                                     <span className="flex items-center"><div className="w-3 h-3 bg-red-500 rounded-full mr-1"></div> Booked</span>
                                                     <span className="flex items-center"><div className="w-3 h-3 bg-yellow-500 rounded-full mr-1"></div> Pending</span>
                                                 </div>
-                                                <div className="grid grid-cols-5 sm:grid-cols-7 gap-2 bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-2 bg-slate-100 dark:bg-slate-800 p-3 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-700">
                                                     {seats.map(seat => {
                                                         let cls = 'bg-green-500 hover:bg-green-600 cursor-pointer text-white';
                                                         if (seat.status === 'booked') cls = 'bg-red-500 cursor-not-allowed text-white opacity-50';
@@ -347,7 +347,7 @@ const Dashboard = () => {
                                         <span className="flex items-center"><div className="w-3 h-3 bg-yellow-500 rounded-full mr-1"></div> Pending</span>
                                         <span className="flex items-center"><div className="w-3 h-3 bg-indigo-600 rounded-full mr-1 ring-2 ring-offset-1 ring-indigo-300"></div> Your Seat</span>
                                     </div>
-                                    <div className="grid grid-cols-5 sm:grid-cols-7 gap-3 bg-slate-100 dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-2 sm:gap-3 bg-slate-100 dark:bg-slate-800 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
                                         {seats.map(seat => {
                                             let cls = 'bg-green-500 cursor-default text-white shadow-sm';
                                             if (seat.status === 'booked') cls = 'bg-red-500 cursor-default text-white opacity-50';

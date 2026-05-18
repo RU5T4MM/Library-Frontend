@@ -90,10 +90,10 @@ const Register = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="max-w-2xl w-full space-y-8 glass-card p-10 rounded-3xl"
+                className="max-w-2xl w-full space-y-8 glass-card p-6 sm:p-10 rounded-3xl"
             >
                 <div>
-                    <h2 className="mt-2 text-center text-3xl font-extrabold text-slate-900 dark:text-white">
+                    <h2 className="mt-2 text-center text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                         Create an account
                     </h2>
                     <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">

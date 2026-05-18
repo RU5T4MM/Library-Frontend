@@ -22,7 +22,7 @@ const NotificationDropdown = ({ notifications, unreadCount, onMarkOne, onMarkAll
     };
 
     return (
-        <div className="absolute right-0 top-12 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[999]">
+        <div className="absolute right-0 top-12 w-72 sm:w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[999]">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">
                     Notifications {unreadCount > 0 && <span className="ml-1 px-1.5 py-0.5 bg-red-500 text-white text-[10px] rounded-full">{unreadCount}</span>}
@@ -130,7 +130,7 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
 
-                    <Link to="/" className="text-2xl font-bold premium-gradient-text flex-shrink-0">
+                    <Link to="/" className="text-xl sm:text-2xl font-bold premium-gradient-text flex-shrink-0">
                         Infotech Library
                     </Link>
 
