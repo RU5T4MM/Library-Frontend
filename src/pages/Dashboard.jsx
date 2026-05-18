@@ -68,20 +68,24 @@ const Dashboard = () => {
 
     const handleBooking = async (e) => {
         e.preventDefault();
-        if (!selectedPlan || !selectedSeat || !paymentScreenshot) {
+        const isDemo = selectedPlan === '3 Days Demo';
+        if (!selectedPlan || !selectedSeat || (!paymentScreenshot && !isDemo)) {
             toast.error('Please complete all steps');
             return;
         }
         setBookingLoading(true);
         try {
-            const formData = new FormData();
-            formData.append('image', paymentScreenshot);
-            const resUpload = await api.post('/upload', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            const screenshotUrl = resUpload.data.data;
+            let screenshotUrl = 'demo';
+            if (!isDemo) {
+                const formData = new FormData();
+                formData.append('image', paymentScreenshot);
+                const resUpload = await api.post('/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                screenshotUrl = resUpload.data.data;
+            }
 
-            const amount = selectedPlan === '1 Month' ? 500 : 1200;
+            const amount = isDemo ? 0 : (selectedPlan === '1 Month' ? 500 : 1200);
             await api.post('/seats/request', {
                 seatNumber: selectedSeat.seatNumber,
                 plan: selectedPlan,
@@ -144,11 +148,32 @@ const Dashboard = () => {
         </div>
     );
 
-    const hasActiveBooking = user?.bookingStatus === 'pending' || user?.bookingStatus === 'approved';
+    const isExpired = user?.membershipExpiryDate && new Date(user.membershipExpiryDate) < new Date();
+    const hasActiveBooking = (user?.bookingStatus === 'pending' || user?.bookingStatus === 'approved') && !isExpired;
 
     return (
         <div className="min-h-screen py-12 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {isExpired && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8 p-4 sm:p-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-xl shadow-sm flex flex-col sm:flex-row items-center gap-4 justify-between"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-800/50 flex items-center justify-center flex-shrink-0 text-red-500">
+                                <FiInfo size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-red-700 dark:text-red-400">Action Required: Membership Expired</h3>
+                                <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                                    Your {user.membershipPlan} plan expired on <strong>{new Date(user.membershipExpiryDate).toLocaleDateString('en-IN')}</strong>. Please make a payment and book a plan to continue using your seat.
+                                </p>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
                 <div className="mb-8 flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">My Dashboard</h1>
@@ -254,8 +279,8 @@ const Dashboard = () => {
                                         {/* Step 1 */}
                                         <div>
                                             <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-3">Step 1: Choose Plan</h4>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {[{ label: '1 Month Plan', value: '1 Month', price: '₹500' }, { label: '3 Month Plan', value: '3 Months', price: '₹1200' }].map(plan => (
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                {[{ label: '1 Month Plan', value: '1 Month', price: '₹500' }, { label: '3 Month Plan', value: '3 Months', price: '₹1200' }, { label: '3 Days Demo', value: '3 Days Demo', price: 'Free' }].map(plan => (
                                                     <div
                                                         key={plan.value}
                                                         onClick={() => setSelectedPlan(plan.value)}
@@ -300,33 +325,44 @@ const Dashboard = () => {
                                         {/* Step 3 */}
                                         {selectedSeat && (
                                             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                                                <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-3">Step 3: Payment</h4>
-                                                <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
-                                                    <p className="mb-4 text-slate-700 dark:text-slate-300">
-                                                        Pay <span className="font-extrabold text-indigo-600 text-xl">₹{selectedPlan === '1 Month' ? '500' : '1200'}</span> via PhonePe
-                                                    </p>
-                                                    <QRCode />
-                                                    <div className="text-left">
-                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Upload Payment Screenshot</label>
-                                                        <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-lg bg-white dark:bg-slate-700 hover:border-indigo-500 transition-colors">
-                                                            <div className="space-y-1 text-center">
-                                                                <FiUpload className="mx-auto h-10 w-10 text-slate-400" />
-                                                                <label className="cursor-pointer text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                                                                    <span>Upload a file</span>
-                                                                    <input type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
-                                                                </label>
-                                                                <p className="text-xs text-slate-500">PNG, JPG up to 500KB</p>
-                                                                {paymentScreenshot && <p className="text-sm text-green-600 font-medium">{paymentScreenshot.name}</p>}
+                                                <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-3">
+                                                    Step 3: {selectedPlan === '3 Days Demo' ? 'Confirm Demo' : 'Payment'}
+                                                </h4>
+                                                
+                                                {selectedPlan !== '3 Days Demo' ? (
+                                                    <div className="bg-slate-100 dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 text-center">
+                                                        <p className="mb-4 text-slate-700 dark:text-slate-300">
+                                                            Pay <span className="font-extrabold text-indigo-600 text-xl">₹{selectedPlan === '1 Month' ? '500' : '1200'}</span> via PhonePe
+                                                        </p>
+                                                        <QRCode />
+                                                        <div className="text-left mt-6">
+                                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Upload Payment Screenshot</label>
+                                                            <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-lg bg-white dark:bg-slate-700 hover:border-indigo-500 transition-colors">
+                                                                <div className="space-y-1 text-center">
+                                                                    <FiUpload className="mx-auto h-10 w-10 text-slate-400" />
+                                                                    <label className="cursor-pointer text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                                                                        <span>Upload a file</span>
+                                                                        <input type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
+                                                                    </label>
+                                                                    <p className="text-xs text-slate-500">PNG, JPG up to 500KB</p>
+                                                                    {paymentScreenshot && <p className="text-sm text-green-600 font-medium">{paymentScreenshot.name}</p>}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                ) : (
+                                                    <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-700/50 text-center mb-6">
+                                                        <p className="text-blue-700 dark:text-blue-400 font-semibold mb-2 text-lg">You selected the 3 Days Free Demo.</p>
+                                                        <p className="text-sm text-blue-600 dark:text-blue-500">No payment is required right now. Admin will review and approve your demo access.</p>
+                                                    </div>
+                                                )}
+
                                                 <button
                                                     type="submit"
                                                     disabled={bookingLoading}
                                                     className="w-full mt-6 py-4 text-lg font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg disabled:opacity-50 transition-all hover:scale-[1.02]"
                                                 >
-                                                    {bookingLoading ? 'Submitting...' : 'Confirm Booking'}
+                                                    {bookingLoading ? 'Submitting...' : selectedPlan === '3 Days Demo' ? 'Start Free Demo' : 'Confirm Booking'}
                                                 </button>
                                             </motion.div>
                                         )}

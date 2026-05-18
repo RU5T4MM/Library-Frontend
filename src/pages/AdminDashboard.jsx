@@ -300,14 +300,20 @@ const AdminDashboard = () => {
                                                 </td>
                                                 <td className="py-4 px-4 font-bold text-slate-900 dark:text-white whitespace-nowrap">₹{req.amount}</td>
                                                 <td className="py-4 px-4 whitespace-nowrap">
-                                                    <a
-                                                        href={req.paymentScreenshot}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-                                                    >
-                                                        <FiEye size={14} /> View
-                                                    </a>
+                                                    {req.plan === '3 Days Demo' ? (
+                                                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-bold">
+                                                            Demo Request
+                                                        </span>
+                                                    ) : (
+                                                        <a
+                                                            href={req.paymentScreenshot}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                                                        >
+                                                            <FiEye size={14} /> View
+                                                        </a>
+                                                    )}
                                                 </td>
                                                 <td className="py-4 px-4 whitespace-nowrap">
                                                     <div className="flex gap-2">
@@ -483,83 +489,132 @@ const AdminDashboard = () => {
                             className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
                         >
                             {/* Modal Header */}
-                            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 relative">
+                            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 p-8 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                                 <button
                                     onClick={() => setSelectedUser(null)}
-                                    className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+                                    className="absolute top-4 right-4 text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors z-10"
                                 >
                                     <FiX size={20} />
                                 </button>
-                                <div className="flex items-center gap-4">
-                                    {selectedUser.profilePhoto && selectedUser.profilePhoto !== 'no-photo.jpg' ? (
-                                        <img
-                                            src={selectedUser.profilePhoto}
-                                            alt={selectedUser.name}
-                                            className="w-16 h-16 rounded-full object-cover border-2 border-white/50"
-                                        />
-                                    ) : (
-                                        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
-                                            {selectedUser.name?.charAt(0).toUpperCase()}
-                                        </div>
-                                    )}
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white">{selectedUser.name}</h3>
-                                        <p className="text-white/70 text-sm">{selectedUser.email}</p>
+                                <div className="flex flex-col sm:flex-row items-center sm:items-end gap-5 relative z-10 pt-4">
+                                    <div className="relative">
+                                        {selectedUser.profilePhoto && selectedUser.profilePhoto !== 'no-photo.jpg' ? (
+                                            <img
+                                                src={selectedUser.profilePhoto}
+                                                alt={selectedUser.name}
+                                                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white dark:border-slate-800 shadow-xl"
+                                            />
+                                        ) : (
+                                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white/20 backdrop-blur-md border-4 border-white/30 flex items-center justify-center text-white text-4xl font-bold shadow-xl">
+                                                {selectedUser.name?.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                        <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-white dark:border-slate-800 ${
+                                            selectedUser.bookingStatus === 'approved' ? 'bg-green-500' :
+                                            selectedUser.bookingStatus === 'pending' ? 'bg-yellow-500' :
+                                            'bg-slate-400'
+                                        }`}></div>
+                                    </div>
+                                    <div className="text-center sm:text-left mb-2">
+                                        <h3 className="text-2xl font-bold text-white tracking-wide">{selectedUser.name}</h3>
+                                        <p className="text-indigo-100 font-medium flex items-center justify-center sm:justify-start gap-2 mt-1">
+                                            <FiUserCheck size={14} /> Student Member
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Modal Body */}
-                            <div className="p-6 space-y-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
-                                        <p className="text-xs text-slate-500 mb-1">Mobile</p>
-                                        <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedUser.mobile}</p>
-                                    </div>
-                                    <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
-                                        <p className="text-xs text-slate-500 mb-1">Seat Number</p>
-                                        <p className="font-semibold text-slate-900 dark:text-white text-sm">
-                                            {selectedUser.seatNumber ? `#${selectedUser.seatNumber.seatNumber}` : 'Not Assigned'}
-                                        </p>
-                                    </div>
-                                    <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
-                                        <p className="text-xs text-slate-500 mb-1">Membership Plan</p>
-                                        <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedUser.membershipPlan || 'None'}</p>
-                                    </div>
-                                    <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
-                                        <p className="text-xs text-slate-500 mb-1">Status</p>
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                                            selectedUser.bookingStatus === 'approved' ? 'bg-green-100 text-green-700' :
-                                            selectedUser.bookingStatus === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                            selectedUser.bookingStatus === 'rejected' ? 'bg-red-100 text-red-700' :
-                                            'bg-slate-100 text-slate-500'
-                                        }`}>
-                                            {selectedUser.bookingStatus || 'none'}
-                                        </span>
+                            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                
+                                {/* Contact Info */}
+                                <div>
+                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">Contact Information</h4>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/30 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-500">
+                                                <FiUser size={14} />
+                                            </div>
+                                            <div className="overflow-hidden">
+                                                <p className="text-[10px] text-slate-500 uppercase">Email</p>
+                                                <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{selectedUser.email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/30 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-500">
+                                                <FiUser size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-slate-500 uppercase">Mobile</p>
+                                                <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedUser.mobile}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-700/30 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 sm:col-span-2">
+                                            <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-500">
+                                                <FiMapPin size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-slate-500 uppercase">Address</p>
+                                                <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedUser.address}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
-                                    <p className="text-xs text-slate-500 mb-1">Address</p>
-                                    <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedUser.address}</p>
-                                </div>
-
-                                {selectedUser.membershipStartDate && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
-                                            <p className="text-xs text-slate-500 mb-1">Start Date</p>
-                                            <p className="font-semibold text-slate-900 dark:text-white text-sm">
-                                                {new Date(selectedUser.membershipStartDate).toLocaleDateString('en-IN')}
+                                {/* Membership Info */}
+                                <div>
+                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">Membership Status</h4>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 text-center">
+                                            <p className="text-xs text-slate-500 mb-1">Seat Assigned</p>
+                                            <p className="font-bold text-2xl text-indigo-600 dark:text-indigo-400">
+                                                {selectedUser.seatNumber ? `#${selectedUser.seatNumber.seatNumber}` : '--'}
                                             </p>
                                         </div>
-                                        <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl">
-                                            <p className="text-xs text-slate-500 mb-1">Expiry Date</p>
-                                            <p className="font-semibold text-slate-900 dark:text-white text-sm">
-                                                {new Date(selectedUser.membershipExpiryDate).toLocaleDateString('en-IN')}
-                                            </p>
+                                        <div className="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 text-center flex flex-col items-center justify-center">
+                                            <p className="text-xs text-slate-500 mb-2">Status</p>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
+                                                selectedUser.bookingStatus === 'approved' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' :
+                                                selectedUser.bookingStatus === 'pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                                                selectedUser.bookingStatus === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' :
+                                                'bg-slate-100 text-slate-500 dark:bg-slate-800'
+                                            }`}>
+                                                {selectedUser.bookingStatus || 'none'}
+                                            </span>
                                         </div>
                                     </div>
-                                )}
+
+                                    <div className="mt-3 bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <div>
+                                                <p className="text-xs text-slate-500 uppercase tracking-wide">Current Plan</p>
+                                                <p className="font-bold text-slate-900 dark:text-white text-lg">{selectedUser.membershipPlan || 'No Plan Active'}</p>
+                                            </div>
+                                            <FiCreditCard className="text-slate-300 dark:text-slate-600" size={24} />
+                                        </div>
+                                        
+                                        {selectedUser.membershipStartDate && (
+                                            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-600/50">
+                                                <div className="flex-1">
+                                                    <p className="text-[10px] text-slate-500 uppercase">Start Date</p>
+                                                    <p className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
+                                                        {new Date(selectedUser.membershipStartDate).toLocaleDateString('en-IN')}
+                                                    </p>
+                                                </div>
+                                                <div className="w-px h-8 bg-slate-200 dark:bg-slate-600/50"></div>
+                                                <div className="flex-1 text-right">
+                                                    <p className="text-[10px] text-slate-500 uppercase">Expiry Date</p>
+                                                    <p className={`font-semibold text-sm ${
+                                                        new Date(selectedUser.membershipExpiryDate) < new Date() ? 'text-red-500' : 'text-slate-800 dark:text-slate-200'
+                                                    }`}>
+                                                        {new Date(selectedUser.membershipExpiryDate).toLocaleDateString('en-IN')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
 
                                 {selectedUser.aadhaarPhoto && (
                                     <div>
@@ -593,7 +648,7 @@ const AdminDashboard = () => {
                                             href={selectedUser.pendingPayment.paymentScreenshot}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm font-medium mb-3"
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-semibold hover:bg-indigo-200 transition-colors mb-4"
                                         >
                                             <FiEye size={14} /> View Payment Screenshot
                                         </a>
