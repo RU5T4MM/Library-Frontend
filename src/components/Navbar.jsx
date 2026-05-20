@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import api from '../services/api';
 
-const NotificationDropdown = ({ notifications, unreadCount, onMarkOne, onMarkAll }) => {
+const NotificationDropdown = ({ notifications, unreadCount, onMarkOne, onMarkAll, onDeleteOne, onDeleteAll }) => {
     const getIcon = (type) => {
         const icons = { request_approved: '✅', request_rejected: '❌', new_request: '📋', expired: '🔴', expiry_warning: '⚠️' };
         return icons[type] || '🔔';
@@ -27,11 +27,18 @@ const NotificationDropdown = ({ notifications, unreadCount, onMarkOne, onMarkAll
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">
                     Notifications {unreadCount > 0 && <span className="ml-1 px-1.5 py-0.5 bg-red-500 text-white text-[10px] rounded-full">{unreadCount}</span>}
                 </h3>
-                {unreadCount > 0 && (
-                    <button onClick={onMarkAll} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
-                        Mark all read
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    {unreadCount > 0 && (
+                        <button onClick={onMarkAll} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                            Mark all read
+                        </button>
+                    )}
+                    {notifications.length > 0 && (
+                        <button onClick={onDeleteAll} className="text-xs text-red-500 hover:text-red-700 font-medium">
+                            Clear all
+                        </button>
+                    )}
+                </div>
             </div>
             <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50">
                 {notifications.length === 0 ? (
@@ -42,19 +49,27 @@ const NotificationDropdown = ({ notifications, unreadCount, onMarkOne, onMarkAll
                 ) : notifications.map(n => (
                     <div
                         key={n._id}
-                        onClick={() => !n.isRead && onMarkOne(n._id)}
-                        className={`px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${!n.isRead ? 'bg-indigo-50/70 dark:bg-indigo-900/20' : ''}`}
+                        className={`px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${!n.isRead ? 'bg-indigo-50/70 dark:bg-indigo-900/20' : ''}`}
                     >
                         <div className="flex gap-3 items-start">
-                            <span className="text-lg flex-shrink-0 mt-0.5">{getIcon(n.type)}</span>
-                            <div className="flex-1 min-w-0">
+                            <span className="text-lg flex-shrink-0 mt-0.5" onClick={() => !n.isRead && onMarkOne(n._id)} style={{cursor: !n.isRead ? 'pointer' : 'default'}}>{getIcon(n.type)}</span>
+                            <div className="flex-1 min-w-0" onClick={() => !n.isRead && onMarkOne(n._id)} style={{cursor: !n.isRead ? 'pointer' : 'default'}}>
                                 <p className={`text-sm font-semibold leading-tight ${!n.isRead ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
                                     {n.title}
                                 </p>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{n.message}</p>
                                 <p className="text-xs text-slate-400 mt-1">{timeAgo(n.createdAt)}</p>
                             </div>
-                            {!n.isRead && <div className="w-2 h-2 bg-indigo-500 rounded-full flex-shrink-0 mt-2"></div>}
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                                {!n.isRead && <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2"></div>}
+                                <button
+                                    onClick={() => onDeleteOne(n._id)}
+                                    className="p-1 text-slate-300 hover:text-red-500 transition-colors rounded"
+                                    title="Delete"
+                                >
+                                    ✕
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -117,6 +132,25 @@ const Navbar = () => {
         } catch { /* silent */ }
     };
 
+    const handleDeleteOne = async (id) => {
+        try {
+            await api.delete(`/notifications/${id}`);
+            setNotifications(prev => prev.filter(n => n._id !== id));
+            setUnreadCount(prev => {
+                const deleted = notifications.find(n => n._id === id);
+                return deleted && !deleted.isRead ? Math.max(0, prev - 1) : prev;
+            });
+        } catch { /* silent */ }
+    };
+
+    const handleDeleteAll = async () => {
+        try {
+            await api.delete('/notifications/delete-all');
+            setNotifications([]);
+            setUnreadCount(0);
+        } catch { /* silent */ }
+    };
+
     const handleLogout = () => {
         dispatch(logout());
         navigate('/');
@@ -173,6 +207,8 @@ const Navbar = () => {
                                             unreadCount={unreadCount}
                                             onMarkOne={handleMarkOne}
                                             onMarkAll={handleMarkAll}
+                                            onDeleteOne={handleDeleteOne}
+                                            onDeleteAll={handleDeleteAll}
                                         />
                                     )}
                                 </div>
@@ -211,6 +247,8 @@ const Navbar = () => {
                                         unreadCount={unreadCount}
                                         onMarkOne={handleMarkOne}
                                         onMarkAll={handleMarkAll}
+                                        onDeleteOne={handleDeleteOne}
+                                        onDeleteAll={handleDeleteAll}
                                     />
                                 )}
                             </div>
