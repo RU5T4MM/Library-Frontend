@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     FiUsers, FiMapPin, FiCreditCard, FiActivity, FiCheckCircle,
     FiLogOut, FiEye, FiX, FiRefreshCw, FiHome, FiList, FiUserCheck,
-    FiTrash2, FiUnlock
+    FiTrash2, FiUnlock, FiUser
 } from 'react-icons/fi';
 import api from '../services/api';
 import { toast } from 'react-toastify';
