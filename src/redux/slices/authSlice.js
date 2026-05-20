@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../services/api';
 
-const token = localStorage.getItem('token') || null;
-const _rawUser = localStorage.getItem('user');
+const token = sessionStorage.getItem('token') || null;
+const _rawUser = sessionStorage.getItem('user');
 const user = _rawUser && _rawUser !== 'undefined' ? JSON.parse(_rawUser) : null;
 
 const initialState = {
@@ -40,8 +40,8 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             state.user = action.payload.user;
             state.token = action.payload.token;
-            localStorage.setItem('token', action.payload.token);
-            localStorage.setItem('user', JSON.stringify(action.payload.user));
+            sessionStorage.setItem('token', action.payload.token);
+            sessionStorage.setItem('user', JSON.stringify(action.payload.user));
         },
         loginFailure: (state, action) => {
             state.loading = false;
@@ -52,8 +52,8 @@ const authSlice = createSlice({
             state.token = null;
             state.isAuthenticated = false;
             state.verifying = false;
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
         },
         setAccountDeleted: (state) => {
             state.user = null;
@@ -61,12 +61,12 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.verifying = false;
             state.accountDeleted = true;
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
         },
         updateUser: (state, action) => {
             state.user = action.payload;
-            localStorage.setItem('user', JSON.stringify(action.payload));
+            sessionStorage.setItem('user', JSON.stringify(action.payload));
         }
     },
     extraReducers: (builder) => {
@@ -75,15 +75,15 @@ const authSlice = createSlice({
                 state.verifying = false;
                 state.isAuthenticated = true;
                 state.user = action.payload;
-                localStorage.setItem('user', JSON.stringify(action.payload));
+                sessionStorage.setItem('user', JSON.stringify(action.payload));
             })
             .addCase(verifyAuth.rejected, (state) => {
                 state.verifying = false;
                 state.isAuthenticated = false;
                 state.user = null;
                 state.token = null;
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
             });
     },
 

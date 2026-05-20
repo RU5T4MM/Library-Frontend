@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     FiUsers, FiMapPin, FiCreditCard, FiActivity, FiCheckCircle,
     FiLogOut, FiEye, FiX, FiRefreshCw, FiHome, FiList, FiUserCheck,
-    FiTrash2, FiUnlock, FiUser
+    FiTrash2, FiUnlock, FiUser, FiShield, FiPlus, FiEyeOff
 } from 'react-icons/fi';
 import api from '../services/api';
 import { toast } from 'react-toastify';
@@ -20,9 +20,14 @@ const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [requests, setRequests] = useState([]);
     const [users, setUsers] = useState([]);
+    const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedUser, setSelectedUser] = useState(null);
     const [actionLoading, setActionLoading] = useState(null);
+    const [showAdminForm, setShowAdminForm] = useState(false);
+    const [adminForm, setAdminForm] = useState({ name: '', email: '', password: '', mobile: '' });
+    const [adminFormLoading, setAdminFormLoading] = useState(false);
+    const [showAdminPassword, setShowAdminPassword] = useState(false);
 
     useEffect(() => {
         fetchAll();
@@ -31,14 +36,16 @@ const AdminDashboard = () => {
     const fetchAll = async () => {
         setLoading(true);
         try {
-            const [statsRes, reqRes, usersRes] = await Promise.all([
+            const [statsRes, reqRes, usersRes, adminsRes] = await Promise.all([
                 api.get('/admin/stats'),
                 api.get('/admin/requests'),
                 api.get('/admin/users'),
+                api.get('/admin/admins'),
             ]);
             setStats(statsRes.data.data);
             setRequests(reqRes.data.data);
             setUsers(usersRes.data.data);
+            setAdmins(adminsRes.data.data);
         } catch {
             toast.error('Failed to load admin data');
         } finally {
@@ -80,6 +87,37 @@ const AdminDashboard = () => {
             fetchAll();
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to delete student');
+        }
+    };
+
+    const handleAdminFormChange = (e) => {
+        setAdminForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const handleRegisterAdmin = async (e) => {
+        e.preventDefault();
+        setAdminFormLoading(true);
+        try {
+            const res = await api.post('/admin/register', adminForm);
+            toast.success(res.data.message);
+            setAdminForm({ name: '', email: '', password: '', mobile: '' });
+            setShowAdminForm(false);
+            fetchAll();
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to register admin');
+        } finally {
+            setAdminFormLoading(false);
+        }
+    };
+
+    const handleDeleteAdmin = async (adminId, adminName) => {
+        if (!window.confirm(`Delete admin "${adminName}"? This cannot be undone.`)) return;
+        try {
+            await api.delete(`/admin/admins/${adminId}`);
+            toast.success(`Admin "${adminName}" deleted successfully`);
+            fetchAll();
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to delete admin');
         }
     };
 
@@ -128,6 +166,7 @@ const AdminDashboard = () => {
         { id: 'overview', label: 'Overview', icon: FiHome },
         { id: 'requests', label: `Requests ${stats.pendingRequests > 0 ? `(${stats.pendingRequests})` : ''}`, icon: FiList },
         { id: 'users', label: 'All Students', icon: FiUsers },
+        { id: 'admins', label: 'Admins', icon: FiShield },
     ];
 
     return (
@@ -332,6 +371,164 @@ const AdminDashboard = () => {
                                                             {actionLoading === req._id + 'rejected' ? '...' : 'Reject'}
                                                         </button>
                                                     </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* ADMINS TAB */}
+                {activeTab === 'admins' && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+
+                        {/* Register New Admin Card */}
+                        <div className="glass-card rounded-2xl overflow-hidden">
+                            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                        <FiShield className="text-indigo-500" /> Register New Admin
+                                    </h3>
+                                    <p className="text-sm text-slate-500 mt-0.5">Only existing admins can create new admin accounts</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowAdminForm(v => !v)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                        showAdminForm
+                                            ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                                            : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                                    }`}
+                                >
+                                    {showAdminForm ? <><FiX size={14} /> Cancel</> : <><FiPlus size={14} /> Add Admin</>}
+                                </button>
+                            </div>
+
+                            {showAdminForm && (
+                                <div className="p-6">
+                                    <form onSubmit={handleRegisterAdmin} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
+                                            <input
+                                                name="name"
+                                                value={adminForm.name}
+                                                onChange={handleAdminFormChange}
+                                                required
+                                                placeholder="Admin full name"
+                                                className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                                            <input
+                                                name="email"
+                                                type="email"
+                                                value={adminForm.email}
+                                                onChange={handleAdminFormChange}
+                                                required
+                                                placeholder="admin@example.com"
+                                                className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mobile</label>
+                                            <input
+                                                name="mobile"
+                                                value={adminForm.mobile}
+                                                onChange={handleAdminFormChange}
+                                                required
+                                                placeholder="10-digit mobile number"
+                                                pattern="[0-9]{10}"
+                                                className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm"
+                                            />
+                                        </div>
+                                        <div className="relative">
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                                            <input
+                                                name="password"
+                                                type={showAdminPassword ? 'text' : 'password'}
+                                                value={adminForm.password}
+                                                onChange={handleAdminFormChange}
+                                                required
+                                                minLength={6}
+                                                placeholder="Min 6 characters"
+                                                className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm pr-10"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAdminPassword(v => !v)}
+                                                className="absolute right-3 top-9 text-slate-400 hover:text-indigo-500"
+                                            >
+                                                {showAdminPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                                            </button>
+                                        </div>
+                                        <div className="sm:col-span-2">
+                                            <button
+                                                type="submit"
+                                                disabled={adminFormLoading}
+                                                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <FiShield size={16} />
+                                                {adminFormLoading ? 'Registering...' : 'Register Admin'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Admins List */}
+                        <div className="glass-card rounded-2xl overflow-hidden">
+                            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                    All Admins
+                                    <span className="ml-2 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-sm rounded-full">
+                                        {admins.length}
+                                    </span>
+                                </h3>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead className="bg-slate-50 dark:bg-slate-800/50">
+                                        <tr>
+                                            {['Admin', 'Mobile', 'Registered On', 'Action'].map(h => (
+                                                <th key={h} className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                        {admins.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="4" className="py-16 text-center text-slate-400">No admins found</td>
+                                            </tr>
+                                        ) : admins.map((a) => (
+                                            <tr key={a._id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                                                <td className="py-4 px-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                                            {a.name?.charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-semibold text-slate-900 dark:text-white flex items-center gap-1">
+                                                                {a.name} <FiShield size={12} className="text-indigo-500" />
+                                                            </p>
+                                                            <p className="text-xs text-slate-500">{a.email}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">{a.mobile}</td>
+                                                <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                                                    {new Date(a.createdAt).toLocaleDateString('en-IN')}
+                                                </td>
+                                                <td className="py-4 px-4 whitespace-nowrap">
+                                                    <button
+                                                        onClick={() => handleDeleteAdmin(a._id, a.name)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-colors"
+                                                    >
+                                                        <FiTrash2 size={12} /> Delete
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}

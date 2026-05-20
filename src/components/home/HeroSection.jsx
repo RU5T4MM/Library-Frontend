@@ -68,11 +68,11 @@ const HeroSection = () => {
     const [loginRole, setLoginRole] = useState('user');
     const [showDeletedPopup, setShowDeletedPopup] = useState(false);
 
-    // Show popup if accountDeleted flag is set (from redux or localStorage)
+    // Show popup if accountDeleted flag is set (from redux or sessionStorage)
     useEffect(() => {
-        if (accountDeleted || localStorage.getItem('accountDeleted') === 'true') {
+        if (accountDeleted || sessionStorage.getItem('accountDeleted') === 'true') {
             setShowDeletedPopup(true);
-            localStorage.removeItem('accountDeleted');
+            sessionStorage.removeItem('accountDeleted');
         }
     }, [accountDeleted]);
 
@@ -150,100 +150,86 @@ const HeroSection = () => {
                     className="relative"
                 >
                     <div className="glass-card p-8 rounded-3xl relative z-10 w-full shadow-2xl">
-                        {isAuthenticated ? (
-                            <div className="text-center py-8">
-                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
-                                    {user?.name?.charAt(0).toUpperCase()}
-                                </div>
-                                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Welcome back!</h3>
-                                <p className="text-slate-500 dark:text-slate-400 mb-6">{user?.name}</p>
-                                <Link
-                                    to={user?.role === 'admin' ? '/admin/dashboard' : '/dashboard'}
-                                    className="btn-primary w-full block text-center py-3 text-base"
+                        <div className="text-center mb-6">
+                            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Welcome Back</h2>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Sign in to your account</p>
+                        </div>
+
+                        {/* Role Toggle */}
+                        <div className="flex justify-center mb-6">
+                            <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-xl inline-flex w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => setLoginRole('user')}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${loginRole === 'user' ? 'bg-white dark:bg-slate-600 shadow-md text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
-                                    {user?.role === 'admin' ? '🛡 Go to Admin Panel' : '📊 Go to Dashboard'}
-                                </Link>
+                                    <FiUser size={14} /> Student
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setLoginRole('admin')}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${loginRole === 'admin' ? 'bg-white dark:bg-slate-600 shadow-md text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                >
+                                    <FiShield size={14} /> Admin
+                                </button>
                             </div>
-                        ) : (
-                            <>
-                                <div className="text-center mb-6">
-                                    <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Welcome Back</h2>
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Sign in to your account</p>
-                                </div>
+                        </div>
 
-                                {/* Role Toggle */}
-                                <div className="flex justify-center mb-6">
-                                    <div className="bg-slate-200 dark:bg-slate-700 p-1 rounded-xl inline-flex w-full">
-                                        <button
-                                            type="button"
-                                            onClick={() => setLoginRole('user')}
-                                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${loginRole === 'user' ? 'bg-white dark:bg-slate-600 shadow-md text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-                                        >
-                                            <FiUser size={14} /> Student
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setLoginRole('admin')}
-                                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-all ${loginRole === 'admin' ? 'bg-white dark:bg-slate-600 shadow-md text-indigo-600 dark:text-indigo-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
-                                        >
-                                            <FiShield size={14} /> Admin
-                                        </button>
-                                    </div>
-                                </div>
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    required
+                                    className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                                    placeholder="Enter your email"
+                                />
+                            </div>
 
-                                <form onSubmit={handleLogin} className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={e => setEmail(e.target.value)}
-                                            required
-                                            className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                                            placeholder="Enter your email"
-                                        />
-                                    </div>
+                            <div className="relative">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    required
+                                    className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white pr-12"
+                                    placeholder="Enter your password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-[38px] text-slate-400 hover:text-indigo-500"
+                                >
+                                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                                </button>
+                            </div>
 
-                                    <div className="relative">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
-                                        <input
-                                            type={showPassword ? 'text' : 'password'}
-                                            value={password}
-                                            onChange={e => setPassword(e.target.value)}
-                                            required
-                                            className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white pr-12"
-                                            placeholder="Enter your password"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-[38px] text-slate-400 hover:text-indigo-500"
-                                        >
-                                            {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                                        </button>
-                                    </div>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-3 font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg disabled:opacity-50 transition-all hover:scale-[1.02] mt-2"
+                            >
+                                {loading ? 'Signing in...' : `Sign in as ${loginRole === 'admin' ? 'Admin' : 'Student'}`}
+                            </button>
+                        </form>
 
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="w-full py-3 font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg disabled:opacity-50 transition-all hover:scale-[1.02] mt-2"
-                                    >
-                                        {loading ? 'Signing in...' : `Sign in as ${loginRole === 'admin' ? 'Admin' : 'Student'}`}
-                                    </button>
-                                </form>
-
-                                <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4">
+                        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4">
+                            {loginRole === 'user' && (
+                                <>
                                     New student?{' '}
                                     <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">
                                         Register here
                                     </Link>
                                     {' · '}
-                                    <Link to="/forgot-password" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                                        Forgot password?
-                                    </Link>
-                                </p>
-                            </>
-                        )}
+                                </>
+                            )}
+                            <Link to="/forgot-password" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                                Forgot password?
+                            </Link>
+                        </p>
                     </div>
 
 
