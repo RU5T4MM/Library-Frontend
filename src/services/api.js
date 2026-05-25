@@ -27,11 +27,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        const hadToken = !!sessionStorage.getItem('token');
         if (error.response?.status === 401) {
-            const hadToken = !!sessionStorage.getItem('token');
+            const errorMessage = error.response?.data?.error;
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('user');
-            if (hadToken) {
+            if (hadToken && errorMessage === 'User no longer exists') {
                 sessionStorage.setItem('accountDeleted', 'true');
             }
         }

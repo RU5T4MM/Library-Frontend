@@ -71,6 +71,18 @@ const NotificationDropdown = ({ notifications, unreadCount, onMarkOne, onMarkAll
                                 </button>
                             </div>
                         </div>
+                        {n.paymentScreenshot && n.paymentScreenshot !== 'demo_no_payment_required' && (
+                            <div className="px-4 pb-3">
+                                <a
+                                    href={n.paymentScreenshot}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                                >
+                                    View payment screenshot
+                                </a>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -217,9 +229,6 @@ const Navbar = () => {
                                     {user?.role === 'admin' ? <FiShield size={14} /> : <FiUser size={14} />}
                                     {user?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                                 </Link>
-                                <button onClick={handleLogout} className="flex items-center gap-1 py-2 px-3 text-sm font-medium text-red-500 hover:text-red-700 transition-colors">
-                                    Logout
-                                </button>
                             </div>
                         ) : (
                             <Link to="/register" className="btn-primary py-2 px-4 text-sm">Sign Up</Link>
@@ -279,14 +288,9 @@ const Navbar = () => {
 
                         <Link to="/contact" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md font-medium hover:bg-slate-100 dark:hover:bg-slate-700">Contact</Link>
                         {isAuthenticated ? (
-                            <>
-                                <Link to={dashboardPath} onClick={() => setIsOpen(false)} className="block px-3 py-2 text-indigo-600 dark:text-indigo-400 font-bold">
-                                    {user?.role === 'admin' ? '🛡 Admin Panel' : '📊 Dashboard'}
-                                </Link>
-                                <button onClick={handleLogout} className="block w-full text-left px-3 py-2 rounded-md font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
-                                    🚪 Logout
-                                </button>
-                            </>
+                            <Link to={dashboardPath} onClick={() => setIsOpen(false)} className="block px-3 py-2 text-indigo-600 dark:text-indigo-400 font-bold">
+                                {user?.role === 'admin' ? '🛡 Admin Panel' : '📊 Dashboard'}
+                            </Link>
                         ) : (
                             <Link to="/register" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md font-medium text-indigo-600">Sign Up</Link>
                         )}

@@ -127,6 +127,17 @@ const AdminDashboard = () => {
         toast.success('Logged out successfully');
     };
 
+    const handleResetRevenue = async () => {
+        if (!window.confirm('Are you sure you want to reset total revenue to zero? This will only count revenue from payments approved after this moment.')) return;
+        try {
+            const res = await api.post('/admin/reset-revenue');
+            toast.success(res.data.message || 'Total revenue reset successfully');
+            fetchAll();
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to reset revenue');
+        }
+    };
+
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
             <div className="text-center">
@@ -247,21 +258,40 @@ const AdminDashboard = () => {
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                         {/* Stats Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-                            {statCards.map((card, i) => (
-                                <motion.div
-                                    key={card.label}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    className="glass-card p-5 rounded-2xl"
-                                >
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${colorMap[card.color]}`}>
-                                        <card.icon size={18} />
-                                    </div>
-                                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{card.value}</p>
-                                    <p className="text-xs text-slate-500 mt-1">{card.label}</p>
-                                </motion.div>
-                            ))}
+                            {statCards.map((card, i) => {
+                                const isRevenue = card.label === 'Total Revenue';
+                                return (
+                                    <motion.div
+                                        key={card.label}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        className="glass-card p-5 rounded-2xl relative group overflow-hidden"
+                                    >
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorMap[card.color]}`}>
+                                                <card.icon size={18} />
+                                            </div>
+                                            {isRevenue && (
+                                                <button
+                                                    onClick={handleResetRevenue}
+                                                    className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                                                    title="Reset Revenue to 0"
+                                                >
+                                                    <FiTrash2 size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <p className="text-2xl font-bold text-slate-900 dark:text-white">{card.value}</p>
+                                        <p className="text-xs text-slate-500 mt-1">{card.label}</p>
+                                        {isRevenue && stats?.revenueLastResetDate && (
+                                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 leading-none">
+                                                Since {new Date(stats.revenueLastResetDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                            </p>
+                                        )}
+                                    </motion.div>
+                                );
+                            })}
                         </div>
 
                         {/* Chart */}
