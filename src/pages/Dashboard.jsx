@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { updateUser, logout } from '../redux/slices/authSlice';
 import jsPDF from 'jspdf';
 import QRCode from '../components/QRCode';
+import DatePicker from '../components/DatePicker';
 
 
 const Dashboard = () => {
@@ -21,6 +22,7 @@ const Dashboard = () => {
     const [selectedPlan, setSelectedPlan] = useState('');
     const [selectedSeat, setSelectedSeat] = useState(null);
     const [paymentScreenshot, setPaymentScreenshot] = useState(null);
+    const [transactionDate, setTransactionDate] = useState(new Date());
     const [bookingLoading, setBookingLoading] = useState(false);
 
     useEffect(() => {
@@ -69,7 +71,7 @@ const Dashboard = () => {
     const handleBooking = async (e) => {
         e.preventDefault();
         const isDemo = selectedPlan === '3 Days Demo';
-        if (!selectedPlan || !selectedSeat || (!paymentScreenshot && !isDemo)) {
+        if (!selectedPlan || !selectedSeat || (!paymentScreenshot && !isDemo) || (!transactionDate && !isDemo)) {
             toast.error('Please complete all steps');
             return;
         }
@@ -90,7 +92,8 @@ const Dashboard = () => {
                 seatNumber: selectedSeat.seatNumber,
                 plan: selectedPlan,
                 amount,
-                paymentScreenshot: screenshotUrl
+                paymentScreenshot: screenshotUrl,
+                transactionDate: transactionDate // backend Payment schema will store this
             });
 
             toast.success('Booking request submitted! Admin will review shortly.');
@@ -348,6 +351,16 @@ const Dashboard = () => {
                                                                     {paymentScreenshot && <p className="text-sm text-green-600 font-medium">{paymentScreenshot.name}</p>}
                                                                 </div>
                                                             </div>
+                                                        </div>
+                                                        
+                                                        <div className="mt-4">
+                                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Transaction Date</label>
+                                                            <DatePicker
+                                                                value={transactionDate}
+                                                                onChange={setTransactionDate}
+                                                                maxDate={new Date()}
+                                                                placeholder="Select transaction date"
+                                                            />
                                                         </div>
                                                     </div>
                                                 ) : (
