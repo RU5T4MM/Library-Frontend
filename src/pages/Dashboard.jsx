@@ -23,6 +23,8 @@ const Dashboard = () => {
     const [selectedSeat, setSelectedSeat] = useState(null);
     const [paymentScreenshot, setPaymentScreenshot] = useState(null);
     const [transactionDate, setTransactionDate] = useState(new Date());
+    const [paymentMethod, setPaymentMethod] = useState('online');
+    const [paymentReference, setPaymentReference] = useState('');
     const [bookingLoading, setBookingLoading] = useState(false);
 
     useEffect(() => {
@@ -71,14 +73,24 @@ const Dashboard = () => {
     const handleBooking = async (e) => {
         e.preventDefault();
         const isDemo = selectedPlan === '3 Days Demo';
-        if (!selectedPlan || !selectedSeat || (!paymentScreenshot && !isDemo) || (!transactionDate && !isDemo)) {
+        if (!selectedPlan || !selectedSeat || (!transactionDate && !isDemo)) {
             toast.error('Please complete all steps');
             return;
+        }
+        if (!isDemo) {
+            if (paymentMethod === 'online' && !paymentScreenshot) {
+                toast.error('Please upload payment screenshot for online payments');
+                return;
+            }
+            if (paymentMethod === 'cash' && !paymentReference.trim()) {
+                toast.error('Please provide cash receipt reference or collector name');
+                return;
+            }
         }
         setBookingLoading(true);
         try {
             let screenshotUrl = 'demo';
-            if (!isDemo) {
+            if (!isDemo && paymentMethod === 'online') {
                 const formData = new FormData();
                 formData.append('image', paymentScreenshot);
                 const resUpload = await api.post('/upload', formData, {
@@ -92,6 +104,8 @@ const Dashboard = () => {
                 seatNumber: selectedSeat.seatNumber,
                 plan: selectedPlan,
                 amount,
+                paymentMethod,
+                paymentReference: paymentReference || null,
                 paymentScreenshot: screenshotUrl,
                 transactionDate: transactionDate // backend Payment schema will store this
             });
@@ -339,18 +353,43 @@ const Dashboard = () => {
                                                         </p>
                                                         <QRCode />
                                                         <div className="text-left mt-6">
+                                                                <div className="mb-4">
+                                                                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Payment Method</p>
+                                                                    <div className="flex items-center justify-center gap-4">
+                                                                        <label className={`px-3 py-2 rounded-lg cursor-pointer ${paymentMethod === 'online' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'}`}>
+                                                                            <input type="radio" name="paymentMethod" value="online" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} className="hidden" />
+                                                                            Online (Upload Receipt)
+                                                                        </label>
+                                                                        <label className={`px-3 py-2 rounded-lg cursor-pointer ${paymentMethod === 'cash' ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'}`}>
+                                                                            <input type="radio" name="paymentMethod" value="cash" checked={paymentMethod === 'cash'} onChange={() => setPaymentMethod('cash')} className="hidden" />
+                                                                            Cash
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
                                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Upload Payment Screenshot</label>
-                                                            <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-lg bg-white dark:bg-slate-700 hover:border-indigo-500 transition-colors">
+                                                                <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 dark:border-slate-600 border-dashed rounded-lg bg-white dark:bg-slate-700 hover:border-indigo-500 transition-colors">
                                                                 <div className="space-y-1 text-center">
                                                                     <FiUpload className="mx-auto h-10 w-10 text-slate-400" />
                                                                     <label className="cursor-pointer text-sm font-medium text-indigo-600 hover:text-indigo-500">
                                                                         <span>Upload a file</span>
-                                                                        <input type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
+                                                                            <input type="file" className="sr-only" accept="image/*" onChange={handleFileChange} disabled={paymentMethod === 'cash'} />
                                                                     </label>
                                                                     <p className="text-xs text-slate-500">PNG, JPG up to 500KB</p>
                                                                     {paymentScreenshot && <p className="text-sm text-green-600 font-medium">{paymentScreenshot.name}</p>}
                                                                 </div>
                                                             </div>
+                                                                {paymentMethod === 'cash' && (
+                                                                    <div className="mt-4 text-left">
+                                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Cash Receipt Reference / Collector Name</label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={paymentReference}
+                                                                            onChange={(e) => setPaymentReference(e.target.value)}
+                                                                            placeholder="e.g., Receipt#123 or Rajesh (Collector)"
+                                                                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                                                        />
+                                                                    </div>
+                                                                )}
                                                         </div>
                                                         
                                                         <div className="mt-4">

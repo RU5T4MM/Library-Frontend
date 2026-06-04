@@ -10,6 +10,7 @@ import {
 import api from '../services/api';
 import { toast } from 'react-toastify';
 import { logout } from '../redux/slices/authSlice';
+import DatePicker from '../components/DatePicker';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const AdminDashboard = () => {
@@ -19,6 +20,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState(null);
     const [requests, setRequests] = useState([]);
+    const [requestDates, setRequestDates] = useState({});
     const [users, setUsers] = useState([]);
     const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -33,6 +35,14 @@ const AdminDashboard = () => {
         fetchAll();
     }, []);
 
+    // Initialize request date for selected user's pending payment (if any)
+    useEffect(() => {
+        if (selectedUser && selectedUser.pendingPayment) {
+            const id = selectedUser.pendingPayment._id;
+            setRequestDates(prev => ({ ...prev, [id]: prev[id] || new Date() }));
+        }
+    }, [selectedUser]);
+
     const fetchAll = async () => {
         setLoading(true);
         try {
@@ -44,6 +54,12 @@ const AdminDashboard = () => {
             ]);
             setStats(statsRes.data.data);
             setRequests(reqRes.data.data);
+            // Initialize requestDates map from server values or default to today
+            const datesMap = {};
+            (reqRes.data.data || []).forEach(r => {
+                datesMap[r._id] = r.transactionDate ? new Date(r.transactionDate) : new Date();
+            });
+            setRequestDates(datesMap);
             setUsers(usersRes.data.data);
             setAdmins(adminsRes.data.data);
         } catch {
@@ -56,7 +72,11 @@ const AdminDashboard = () => {
     const handleAction = async (id, status) => {
         setActionLoading(id + status);
         try {
-            await api.put(`/admin/requests/${id}`, { status });
+            const payload = { status };
+            if (status === 'approved' && requestDates[id]) {
+                payload.transactionDate = requestDates[id];
+            }
+            await api.put(`/admin/requests/${id}`, payload);
             toast.success(`Request ${status} successfully`);
             fetchAll();
         } catch (error) {
@@ -64,6 +84,10 @@ const AdminDashboard = () => {
         } finally {
             setActionLoading(null);
         }
+    };
+
+    const handleRequestDateChange = (id, date) => {
+        setRequestDates(prev => ({ ...prev, [id]: date }));
     };
 
     const handleFreeSeat = async (seatId, userName) => {
@@ -373,6 +397,10 @@ const AdminDashboard = () => {
                                                         <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-bold">
                                                             Demo Request
                                                         </span>
+                                                    ) : req.paymentMethod === 'cash' ? (
+                                                        <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-lg text-xs font-bold">
+                                                            Cash • {req.paymentReference || 'No ref'}
+                                                        </span>
                                                     ) : (
                                                         <a
                                                             href={req.paymentScreenshot}
@@ -386,13 +414,26 @@ const AdminDashboard = () => {
                                                 </td>
                                                 <td className="py-4 px-4 whitespace-nowrap">
                                                     <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => handleAction(req._id, 'approved')}
-                                                            disabled={actionLoading === req._id + 'approved'}
-                                                            className="px-3 py-1.5 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-colors"
-                                                        >
-                                                            {actionLoading === req._id + 'approved' ? '...' : 'Approve'}
-                                                        </button>
+                                                        {req.plan !== '3 Days Demo' && (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-36">
+                                                                    <DatePicker
+                                                                        value={requestDates[req._id]}
+                                                                        onChange={(d) => handleRequestDateChange(req._id, d)}
+                                                                        maxDate={new Date()}
+                                                                        placeholder="Txn date"
+                                                                        className="w-full"
+                                                                    />
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => handleAction(req._id, 'approved')}
+                                                                    disabled={actionLoading === req._id + 'approved'}
+                                                                    className="px-3 py-1.5 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-colors"
+                                                                >
+                                                                    {actionLoading === req._id + 'approved' ? '...' : 'Approve'}
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                         <button
                                                             onClick={() => handleAction(req._id, 'rejected')}
                                                             disabled={actionLoading === req._id + 'rejected'}
@@ -871,25 +912,42 @@ const AdminDashboard = () => {
                                                 <p className="font-bold text-slate-900 dark:text-white">₹{selectedUser.pendingPayment.amount}</p>
                                             </div>
                                         </div>
-                                        <a
-                                            href={selectedUser.pendingPayment.paymentScreenshot}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-semibold hover:bg-indigo-200 transition-colors mb-4"
-                                        >
-                                            <FiEye size={14} /> View Payment Screenshot
-                                        </a>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    handleAction(selectedUser.pendingPayment._id, 'approved');
-                                                    setSelectedUser(null);
-                                                }}
-                                                disabled={actionLoading === selectedUser.pendingPayment._id + 'approved'}
-                                                className="flex-1 py-2 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-lg text-sm font-bold transition-colors"
+                                        {selectedUser.pendingPayment.paymentMethod === 'cash' ? (
+                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-lg text-sm font-semibold mb-4">
+                                                <FiEye size={14} /> Cash • {selectedUser.pendingPayment.paymentReference || 'No ref'}
+                                            </div>
+                                        ) : (
+                                            <a
+                                                href={selectedUser.pendingPayment.paymentScreenshot}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm font-semibold hover:bg-indigo-200 transition-colors mb-4"
                                             >
-                                                ✓ Approve
-                                            </button>
+                                                <FiEye size={14} /> View Payment Screenshot
+                                            </a>
+                                        )}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <div>
+                                                <p className="text-xs text-slate-500 mb-2">Transaction Date</p>
+                                                <DatePicker
+                                                    value={requestDates[selectedUser.pendingPayment._id]}
+                                                    onChange={(d) => handleRequestDateChange(selectedUser.pendingPayment._id, d)}
+                                                    maxDate={new Date()}
+                                                    placeholder="Txn date"
+                                                />
+                                            </div>
+                                            <div className="flex items-end">
+                                                <button
+                                                    onClick={() => {
+                                                        handleAction(selectedUser.pendingPayment._id, 'approved');
+                                                        setSelectedUser(null);
+                                                    }}
+                                                    disabled={actionLoading === selectedUser.pendingPayment._id + 'approved'}
+                                                    className="flex-1 py-2 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-lg text-sm font-bold transition-colors"
+                                                >
+                                                    ✓ Approve
+                                                </button>
+                                            </div>
                                             <button
                                                 onClick={() => {
                                                     handleAction(selectedUser.pendingPayment._id, 'rejected');
